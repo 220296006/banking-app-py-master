@@ -1,0 +1,16 @@
+Account Number: 368602
+Username: thabiso_matsaba
+Password (hashed): 937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244
+
+Account Number: 622434
+Username: luvuyo_tafeni
+Password (hashed): 937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244
+
+Account Number: 218446
+Username: kuul
+Password (hashed): b4daccd77d55216b7115244b737ac9dda5dc13b1bf63393f8b9d6e81c133bcbc
+
+Account Number: 690235
+Username: shaun
+Password (hashed): 03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4
+
