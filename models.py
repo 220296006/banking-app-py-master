@@ -9,14 +9,18 @@ class User:
         self.username = username
         self.password = password
 
+
 # Account Class
 class Account:
-    def __init__(self, user, balance=0.0):
+    def __init__(self, user, account_number):
         self.user = user
-        self.balance = balance
+        self.balance = 0
+        self.account_number = account_number
 
     def view_balance(self):
-        return self.balance
+        total_withdrawals = self.get_total_withdrawals()
+        net_balance = self.balance - total_withdrawals
+        return net_balance
 
     def deposit(self, amount):
         if amount > 0:
@@ -25,15 +29,41 @@ class Account:
         else:
             return False
 
+    # Function to withdraw money from the account
     def withdraw(self, amount):
         if 0 < amount <= self.balance:
             self.balance -= amount
+            print(f"Withdrawal successful. New balance: {self.balance}")
             return True
         else:
+            print(f"Invalid withdrawal amount or insufficient balance. Current balance: {self.balance}")
             return False
 
     def get_balance(self):
         return self.balance
+
+    def get_total_withdrawals(self):
+        with open("transaction_log.txt", "r") as log_file:
+            lines = log_file.readlines()
+            total_withdrawals = 0
+
+            in_user_transactions = False
+            for line in lines:
+                if in_user_transactions:
+                    if line.startswith("Username:"):
+                        # Reached the end of user transactions
+                        break
+                    elif line.startswith("## Withdrawals ##"):
+                        # Start of a withdrawal block
+                        continue
+                    elif line.startswith("Amount: $"):
+                        amount = float(line.split("$")[1].strip())
+                        total_withdrawals += amount
+                if f"Account Number: {self.account_number}" in line:
+                    in_user_transactions = True
+
+        return total_withdrawals
+
 
 # Invest Class
 class Invest:

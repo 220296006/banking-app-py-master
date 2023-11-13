@@ -1,5 +1,12 @@
+# @Author : Thabiso Matsaba
+# @Project : banking-app-py-master
+# @Date:  2023/11/13
+# @Time : 11:57
+
 import hashlib
 import random
+
+from database import SessionLocal
 from models import User, Account
 
 
@@ -11,33 +18,43 @@ def generate_account_number():
 
 # Function to register a new user
 def register_user():
-    # Get user input for username and password
-    username = input("Enter your username: ")
+    # Get user input for registration
+    firstname = input("Enter your first name: ")
+    lastname = input("Enter your last name: ")
+    gender = input("Enter your gender: ")
+    phone_number = input("Enter your phone number: ")
+    email = input("Enter your email: ")
     password = input("Enter your password: ")
+    password_confirmation = input("Confirm your password: ")
 
-    # Hash the password using SHA-256 for security
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    # Check if passwords match
+    if password != password_confirmation:
+        print("Passwords do not match. Registration failed.")
+        return
 
-    # Generate a unique account number
+    # Generate a new account number
     account_number = generate_account_number()
 
     # Create a new User instance
-    user = User(username, hashed_password)
+    new_user = User(
+        account_number=account_number,
+        firstname=firstname,
+        lastname=lastname,
+        gender=gender,
+        phone_number=phone_number,
+        email=email,
+        password=password
+    )
 
-    # Create an Account for the user
-    account = Account(user)
-
-    # Save user data to bank_users.txt
-    with open("bank_users.txt", "a") as file:
-        file.write(f"Account Number: {account_number}\n")
-        file.write(f"Username: {username}\n")
-        file.write(f"Password (hashed): {hashed_password}\n")
-        file.write("\n")
+    # Save the new user to the database
+    with SessionLocal() as session:
+        session.add(new_user)
+        session.commit()
 
     print("User registration successful!")
 
     # Call banking_operations after successful registration
-    banking_operations(account)
+    banking_operations(account, user, account_number)
 
 
 # Function to log in a user
@@ -66,37 +83,23 @@ def login_user():
 
         if user_found:
             print("Login successful!")
+
+            # Create a new Account instance for the logged-in user
+            account = Account(user)
+            account.account_number = account_number
+
             # Get and display the user's current balance
-            current_balance = get_current_balance(account_number)
-            print(f"Current Balance: ${current_balance}")
             return account_number, user
         else:
             print("Login failed. Username or password is incorrect.")
             return None, None
 
-# Function to get a user's current balance from the transaction log
-def get_current_balance(account_number):
-    with open("transaction_log.txt", "r") as log_file:
-        lines = log_file.readlines()
-        current_balance = 0.0
-        in_user_transactions = False
-        for line in lines:
-            if in_user_transactions:
-                if line.startswith("Username:"):
-                    # Reached the end of user transactions
-                    break
-                elif line.startswith("Amount: $"):
-                    amount = float(line.split("$")[1].strip())
-                    current_balance += amount
-            if f"Account Number: {account_number}" in line:
-                in_user_transactions = True
-    return current_balance
-
 
 # Function to perform banking operations for a logged-in user
-def banking_operations(account, user):
+def banking_operations(account, user, account_number):
     username = user.username.upper()
-    print(f"\nWelcome, {username}! Your account balance: ${account.current.balance()}")
+    current_balance = get_current_balance(account_number)
+    print(f"\nWelcome, {username}! Your account balance: ${current_balance}")
     while True:
         print("\nBanking Options:")
         print("1. Deposit")
@@ -109,16 +112,13 @@ def banking_operations(account, user):
         if choice == "1":
             make_deposit(account, user)
         elif choice == "2":
-            amount = float(input("Enter the withdrawal amount: "))
-            if account.withdraw(amount):
-                print(f"Withdrawal of ${amount} successful.")
-            else:
-                print("Invalid withdrawal amount or insufficient balance.")
+            make_withdrawal(account, user)
         elif choice == "3":
             # Implement the logic to handle investments
             pass
         elif choice == "4":
-            print(f"Account balance: ${account.view_balance()}")
+            current_balance = get_current_balance(account.account_number)
+            print(f"Account balance: ${current_balance}")
         elif choice == "5":
             print("Logging out.")
             break
@@ -129,28 +129,82 @@ def banking_operations(account, user):
 # Function to make Deposit
 def make_deposit(account, user):
     amount = float(input("Enter the deposit amount: "))
-    if account.deposit(amount):
-        print(f"Deposit of ${amount} successful.")
+
+    if amount > 0:  # Check if the deposit amount is positive
+        if account.deposit(amount):
+            print(f"Deposit of ${amount} successful.")
+
+            # Access the username attribute from the user object and convert it to uppercase
+            username = user.username.upper()
+
+            # Get the current balance after the deposit
+            current_balance = account.view_balance()
+
+            # Save the deposit information to transaction_log.txt
+            with open("transaction_log.txt", "a") as log_file:
+                log_file.write("## Deposits ##\n")
+                log_file.write(f"Username: {username}\n")
+                log_file.write(f"Account Number: {account.account_number}\n")
+                log_file.write(f"Amount: ${amount}\n")
+                log_file.write(f"Current Balance: ${current_balance}\n")
+                log_file.write("#############\n")
+        else:
+            print("Invalid deposit amount.")
+    else:
+        print("Invalid deposit amount. Please enter an amount greater than zero.")
+
+
+# Function to make Withdrawal
+def make_withdrawal(account, user):
+    amount = float(input("Enter the withdrawal amount: "))
+    if account.withdraw(amount):
+        print(f"Withdrawal of ${amount} successful.")
 
         # Access the username attribute from the user object and convert it to uppercase
         username = user.username.upper()
 
-        # Get the current balance after the deposit
+        # Get the current balance after the withdrawal
         current_balance = account.view_balance()
 
-        # Save the deposit information to transaction_log.txt
+        # Save the withdrawal information to transaction_log.txt
         with open("transaction_log.txt", "a") as log_file:
-            log_file.write("## Deposits ##\n")
+            log_file.write("## Withdrawals ##\n")
             log_file.write(f"Username: {username}\n")
             log_file.write(f"Account Number: {account.account_number}\n")
             log_file.write(f"Amount: ${amount}\n")
             log_file.write(f"Current Balance: ${current_balance}\n")
-            log_file.write("#############\n")
+            log_file.write("#################\n")
     else:
-        print("Invalid deposit amount.")
+        print("Invalid withdrawal amount or insufficient balance.")
+
+
+# Function to get a user's current balance from the transaction log
+def get_current_balance(account_number):
+    with open("transaction_log.txt", "r") as log_file:
+        lines = log_file.readlines()
+        current_balance = 0  # Initialize with zero
+
+        in_user_transactions = False
+        for line in lines:
+            if in_user_transactions:
+                if line.startswith("Username:"):
+                    # Reached the end of user transactions
+                    break
+                elif line.startswith("Amount: $"):
+                    amount = float(line.split("$")[1].strip())
+                    if "Withdrawals" in line:
+                        current_balance -= amount  # Subtract withdrawal amount
+                    else:
+                        current_balance += amount  # Add deposit amount
+            if f"Account Number: {account_number}" in line:
+                in_user_transactions = True
+
+    return current_balance
 
 
 if __name__ == "__main__":
+    account = None  # Initialize account
+
     while True:
         print("\nWelcome to the Banking App")
         print("1. Register a new user")
@@ -163,10 +217,9 @@ if __name__ == "__main__":
         elif choice == "2":
             account_number, user = login_user()
             if account_number:
-                user_account = Account(User("", ""))  # Create a temporary account
-                user_account.user = User("", "")  # Reset the temporary account's user
-                user_account.account_number = account_number
-                banking_operations(user_account, user)
+                account = Account(user)  # Create a new account
+                account.account_number = account_number
+                banking_operations(account, user)
         elif choice == "3":
             print("Goodbye!")
             break
