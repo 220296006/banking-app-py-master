@@ -5,6 +5,7 @@
 
 # User Class
 class User:
+
     def __init__(self, username, password):
         self.username = username
         self.password = password
@@ -56,8 +57,8 @@ class Account:
                     elif line.startswith("## Withdrawals ##"):
                         # Start of a withdrawal block
                         continue
-                    elif line.startswith("Amount: $"):
-                        amount = float(line.split("$")[1].strip())
+                    elif line.startswith("Amount: R"):
+                        amount = float(line.split("R")[1].strip())
                         total_withdrawals += amount
                 if f"Account Number: {self.account_number}" in line:
                     in_user_transactions = True
