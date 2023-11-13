@@ -13,6 +13,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
+    account_number = Column(Integer, unique=True, index=True)
     firstname = Column(String)
     lastname = Column(String)
     gender = Column(String)
