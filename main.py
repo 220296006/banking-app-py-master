@@ -176,7 +176,20 @@ def make_deposit(account_number, user):
 
 # Function to make Withdrawal
 def make_withdrawal(account_number, user):
+    # Get the user's current balance
+    current_balance = view_balance(account_number)
+
+    # Check if the balance is sufficient for withdrawal
+    if current_balance <= 0:
+        print("Insufficient funds. Withdrawal failed.")
+        return
+
     amount = float(input("Enter the withdrawal amount: "))
+
+    # Check if the withdrawal amount is valid
+    if amount <= 0 or amount > current_balance:
+        print("Invalid withdrawal amount. Please enter a valid amount.")
+        return
 
     # Create a new Transaction instance for the withdrawal
     withdrawal_transaction = Transaction(

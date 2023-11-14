@@ -2,16 +2,22 @@
 # @Project : banking-app-py-master
 # @Date:  2023/11/13
 # @Time : 15:08
+
+
 import hashlib
 from datetime import datetime
 
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
+
+from models import User
 
 Base = declarative_base()
 
+def get_user_by_account_number(session: Session, account_number: int) -> User:
+    return session.query(User).filter(User.account_number == account_number).first()
 
-# User model
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -28,9 +34,10 @@ class User(Base):
     transactions = relationship("Transaction", back_populates="user")
     investments = relationship("Investment", back_populates="user")
 
-    def verify_password(self, password):
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        return self.password == hashed_password
+    def verify_password(self, entered_password):
+        hashed_entered_password = hashlib.sha256(entered_password.encode()).hexdigest()
+        result = self.password == hashed_entered_password
+        return result
 
 
 # Transaction model
@@ -77,7 +84,7 @@ engine = create_engine(DATABASE_URL)
 
 # Drop existing tables (optional)
 
-#Base.metadata.drop_all(bind=engine)
+# Base.metadata.drop_all(bind=engine)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
