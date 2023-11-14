@@ -5,6 +5,8 @@
 
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+from tkinter import font as tkfont
+from tkinter import ttk
 
 from database import SessionLocal, Transaction, get_user_by_account_number, Investment
 
@@ -17,27 +19,33 @@ class BankingGUI:
         self.master.title("Banking App")
         self.load_user_data(account_number)
 
+        # Use Ubuntu font
+        ubuntu_font = tk.Font(family="Ubuntu", size=12)
+
+        # Update label styles
+        label_style = {'font': ubuntu_font}
+
         # Welcome message
         if self.user:
             self.label_welcome = tk.Label(master, text=f"Welcome {self.user.first_name} {self.user.last_name}!")
-            self.label_welcome.pack()
+            self.label_welcome.pack(pady=10)
 
             # Account balance
             self.label_balance = tk.Label(master, text=f"Your Account Balance is: R{self.current_balance:.2f}")
-            self.label_balance.pack()
+            self.label_balance.pack(pady=10)
 
             # Buttons
             self.btn_transaction = tk.Button(master, text="Transaction", command=self.show_transaction_options)
-            self.btn_transaction.pack()
+            self.btn_transaction.pack(pady=10)
 
             self.btn_investment = tk.Button(master, text="Investment", command=self.show_investment_options)
-            self.btn_investment.pack()
+            self.btn_investment.pack(pady=10)
 
             self.btn_statement = tk.Button(master, text="Statement", command=self.view_statement)
-            self.btn_statement.pack()
+            self.btn_statement.pack(pady=10)
 
             self.btn_view_balance = tk.Button(master, text="View Balance", command=self.view_balance)
-            self.btn_view_balance.pack()
+            self.btn_view_balance.pack(pady=10)
         else:
             messagebox.showerror("Error", "User not found. Unable to load data.")
 

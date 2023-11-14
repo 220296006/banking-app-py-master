@@ -5,6 +5,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import font as tkfont
 import hashlib
 
 from sqlalchemy.orm import sessionmaker
@@ -19,20 +20,30 @@ class LoginApp:
         self.master = master
         self.master.title("User Login")
 
-        self.label_username = tk.Label(master, text="Username:")
-        self.label_username.pack()
+        # Use Ubuntu font
+        ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
 
-        self.entry_username = tk.Entry(master)
-        self.entry_username.pack()
+        # Update label and entry styles
+        label_style = {'font': ubuntu_font}
+        entry_style = {'font': ubuntu_font, 'width': 30}
 
-        self.label_password = tk.Label(master, text="Password:")
-        self.label_password.pack()
+        self.label_username = tk.Label(master, text="Username:", **label_style)
+        self.label_username.pack(pady=10)
 
-        self.entry_password = tk.Entry(master, show="*")
-        self.entry_password.pack()
+        self.entry_username = tk.Entry(master, **entry_style)
+        self.entry_username.pack(pady=10)
 
-        self.btn_login = tk.Button(master, text="Login", command=self.login_user)
-        self.btn_login.pack()
+        self.label_password = tk.Label(master, text="Password:", **label_style)
+        self.label_password.pack(pady=10)
+
+        self.entry_password = tk.Entry(master, show="*", **entry_style)
+        self.entry_password.pack(pady=10)
+
+        # Style for the login button
+        btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 10}
+
+        self.btn_login = tk.Button(master, text="Login", command=self.login_user, **btn_style)
+        self.btn_login.pack(pady=10)
 
     def login_user(self):
         first_name = self.entry_username.get().strip()

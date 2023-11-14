@@ -6,6 +6,8 @@
 import tkinter as tk
 import random
 from tkinter import messagebox
+from tkinter import font as tkfont
+from tkinter import ttk
 import hashlib
 from database import SessionLocal, User
 from sqlalchemy.exc import IntegrityError
@@ -18,54 +20,67 @@ class RegistrationApp:
         self.master = master
         self.master.title("User Registration")
 
-        self.label_first_name = tk.Label(master, text="First Name:")
-        self.label_first_name.pack()
+        # Use Ubuntu font
+        ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
 
-        self.entry_first_name = tk.Entry(master)
-        self.entry_first_name.pack()
+        # Update label and entry styles
+        label_style = {'font': ubuntu_font}
+        entry_style = {'font': ubuntu_font, 'width': 30}
 
-        self.label_last_name = tk.Label(master, text="Last Name:")
-        self.label_last_name.pack()
+        self.label_first_name = tk.Label(master, text="First Name:", **label_style)
+        self.label_first_name.pack(pady=10)
 
-        self.entry_last_name = tk.Entry(master)
-        self.entry_last_name.pack()
+        self.entry_first_name = tk.Entry(master, **entry_style)
+        self.entry_first_name.pack(pady=10)
 
-        self.label_gender = tk.Label(master, text="Gender:")
-        self.label_gender.pack()
+        self.label_last_name = tk.Label(master, text="Last Name:", **label_style)
+        self.label_last_name.pack(pady=10)
 
-        # Dropdown menu for gender
+        self.entry_last_name = tk.Entry(master, **entry_style)
+        self.entry_last_name.pack(pady=10)
+
+        self.label_gender = tk.Label(master, text="Gender:", **label_style)
+        self.label_gender.pack(pady=10)
+
+        # Use a larger font for OptionMenu
+        gender_font = tkfont.Font(family="Ubuntu", size=13)
+        ttk.Style().configure('TMenubutton', font=gender_font)
+
         self.gender_var = tk.StringVar()
         self.gender_var.set("Male")  # Default value
         gender_options = ["Male", "Female"]
-        self.gender_menu = tk.OptionMenu(master, self.gender_var, *gender_options)
-        self.gender_menu.pack()
+        self.gender_menu = ttk.OptionMenu(master, self.gender_var, *gender_options)
+        self.gender_menu.pack(pady=10)
 
-        self.label_phone_number = tk.Label(master, text="Phone Number:")
-        self.label_phone_number.pack()
+        self.label_phone_number = tk.Label(master, text="Phone Number:", **label_style)
+        self.label_phone_number.pack(pady=10)
 
-        self.entry_phone_number = tk.Entry(master)
-        self.entry_phone_number.pack()
+        self.entry_phone_number = tk.Entry(master, **entry_style)
+        self.entry_phone_number.pack(pady=10)
 
-        self.label_email = tk.Label(master, text="Email:")
-        self.label_email.pack()
+        self.label_email = tk.Label(master, text="Email:", **label_style)
+        self.label_email.pack(pady=10)
 
-        self.entry_email = tk.Entry(master)
-        self.entry_email.pack()
+        self.entry_email = tk.Entry(master, **entry_style)
+        self.entry_email.pack(pady=10)
 
-        self.label_password = tk.Label(master, text="Password:")
-        self.label_password.pack()
+        self.label_password = tk.Label(master, text="Password:", **label_style)
+        self.label_password.pack(pady=10)
 
-        self.entry_password = tk.Entry(master, show="*")
-        self.entry_password.pack()
+        self.entry_password = tk.Entry(master, show="*", **entry_style)
+        self.entry_password.pack(pady=10)
 
-        self.label_password_confirmation = tk.Label(master, text="Confirm Password:")
-        self.label_password_confirmation.pack()
+        self.label_password_confirmation = tk.Label(master, text="Confirm Password:", **label_style)
+        self.label_password_confirmation.pack(pady=10)
 
-        self.entry_password_confirmation = tk.Entry(master, show="*")
-        self.entry_password_confirmation.pack()
+        self.entry_password_confirmation = tk.Entry(master, show="*", **entry_style)
+        self.entry_password_confirmation.pack(pady=10)
 
-        self.btn_register = tk.Button(master, text="Register", command=self.register_user)
-        self.btn_register.pack()
+        # Style for the register button
+        btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 5}
+
+        self.btn_register = tk.Button(master, text="Register", command=self.register_user, **btn_style)
+        self.btn_register.pack(pady=10)
 
     @staticmethod
     def generate_account_number():
