@@ -4,14 +4,12 @@
 # @Time : 09:28
 
 import tkinter as tk
-import random
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 from tkinter import font as tkfont
-from tkinter import ttk
+import random
 import hashlib
 from database import SessionLocal, User
 from sqlalchemy.exc import IntegrityError
-
 from login_gui import LoginApp
 
 
@@ -27,6 +25,7 @@ class RegistrationApp:
         label_style = {'font': ubuntu_font}
         entry_style = {'font': ubuntu_font, 'width': 30}
 
+        # Labels and entries
         self.label_first_name = tk.Label(master, text="First Name:", **label_style)
         self.label_first_name.pack(pady=10)
 
@@ -79,7 +78,8 @@ class RegistrationApp:
         # Style for the register button
         btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 5}
 
-        self.btn_register = tk.Button(master, text="Register", command=self.register_user, **btn_style)
+        # Register button
+        self.btn_register = ttk.Button(master, text="Register", command=self.register_user, **btn_style)
         self.btn_register.pack(pady=10)
 
     @staticmethod
@@ -123,7 +123,6 @@ class RegistrationApp:
 
             messagebox.showinfo("Success", "User registration successful!")
         except IntegrityError:
-
             messagebox.showerror("Error", "This username or email is already taken. Please choose a different one.")
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred during registration: {e}")

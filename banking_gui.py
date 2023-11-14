@@ -4,9 +4,7 @@
 # @Time : 10:10
 
 import tkinter as tk
-from tkinter import messagebox, simpledialog
-from tkinter import font as tkfont
-from tkinter import ttk
+from tkinter import messagebox, simpledialog, font
 
 from database import SessionLocal, Transaction, get_user_by_account_number, Investment
 
@@ -20,10 +18,10 @@ class BankingGUI:
         self.load_user_data(account_number)
 
         # Use Ubuntu font
-        ubuntu_font = tk.Font(family="Ubuntu", size=12)
+        ubuntu_font = font.Font(family="Ubuntu", size=12)
 
         # Update label styles
-        label_style = {'font': ubuntu_font}
+        label_style = {'font': ubuntu_font, 'padx': 10, 'pady': 10}
 
         # Welcome message
         if self.user:
@@ -109,8 +107,14 @@ class BankingGUI:
         loan_term_years = simpledialog.askinteger("Bond/Home Loan", "Enter loan term (in years):")
 
         if loan_amount and interest_rate and loan_term_years:
-            monthly_payment = self.calculate_monthly_payment(loan_amount, interest_rate, loan_term_years, "simple")
-            self.save_investment_details("Bond/Home Loan", loan_amount, interest_rate, loan_term_years, monthly_payment)
+            interest_type = simpledialog.askstring("Interest Type", "Enter interest type (simple/compound):")
+            if interest_type and interest_type.lower() in ["simple", "compound"]:
+                monthly_payment = self.calculate_monthly_payment(loan_amount, interest_rate, loan_term_years,
+                                                                 interest_type)
+                self.save_investment_details("Bond/Home Loan", loan_amount, interest_rate, loan_term_years,
+                                             monthly_payment)
+            else:
+                messagebox.showerror("Error", "Invalid interest type. Please enter 'simple' or 'compound'.")
 
     def perform_investment_calculation(self):
         investment_amount = simpledialog.askfloat("Investment", "Enter investment amount:")
@@ -122,17 +126,23 @@ class BankingGUI:
             self.save_investment_details("Investment", investment_amount, annual_return_rate, investment_term_years,
                                          future_value)
 
-    def calculate_monthly_payment(self, loan_amount, annual_interest_rate, loan_term_years, interest_type):
+    @staticmethod
+    def calculate_monthly_payment(loan_amount, annual_interest_rate, loan_term_years, interest_type):
         monthly_interest_rate = annual_interest_rate / 12 / 100
         num_payments = loan_term_years * 12
 
         if interest_type == "simple":
             monthly_payment = (loan_amount * monthly_interest_rate) / (1 - (1 + monthly_interest_rate) ** -num_payments)
+        elif interest_type == "compound":
+            monthly_payment = (loan_amount * monthly_interest_rate * (1 + monthly_interest_rate) ** num_payments) / (
+                        (1 + monthly_interest_rate) ** num_payments - 1)
         else:
-            pass
+            raise ValueError("Invalid interest type. Use 'simple' or 'compound'.")
+
         return monthly_payment
 
-    def calculate_future_value(self, investment_amount, annual_return_rate, investment_term_years):
+    @staticmethod
+    def calculate_future_value(investment_amount, annual_return_rate, investment_term_years):
         future_value = investment_amount * (1 + annual_return_rate / 100) ** investment_term_years
 
         return future_value
@@ -162,7 +172,8 @@ class BankingGUI:
             if transactions:
                 statement = "Transaction Statement:\n"
                 for transaction in transactions:
-                    statement += f"{transaction.timestamp} - {transaction.deposits} Deposits, {transaction.withdrawals} Withdrawals\n"
+                    statement += (f"{transaction.timestamp} - {transaction.deposits} Deposits, "
+                                  f"{transaction.withdrawals} Withdrawals\n")
 
                 messagebox.showinfo("Transaction Statement", statement)
             else:
