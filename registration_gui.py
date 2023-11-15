@@ -64,6 +64,15 @@ class RegistrationApp:
         self.entry_email = tk.Entry(master, **entry_style)
         self.entry_email.pack(pady=10)
 
+        # Password generation checkbox
+        self.use_generated_password = tk.BooleanVar()
+        self.use_generated_password.set(False)  # Default value
+
+        self.checkbox_generate_password = tk.Checkbutton(master, text="Generate Strong Password",
+                                                         variable=self.use_generated_password,
+                                                         command=self.toggle_password_entry, **label_style)
+        self.checkbox_generate_password.pack(pady=10)
+
         self.label_password = tk.Label(master, text="Password:", **label_style)
         self.label_password.pack(pady=10)
 
@@ -87,16 +96,28 @@ class RegistrationApp:
     def generate_account_number():
         return random.randint(100000, 999999)
 
+    def toggle_password_entry(self):
+        # Enable or disable the password entry based on the checkbox state
+        state = tk.NORMAL if not self.use_generated_password.get() else tk.DISABLED
+        self.entry_password.configure(state=state)
+        self.entry_password_confirmation.configure(state=state)
+
     def register_user(self):
         first_name = self.entry_first_name.get().strip()
         last_name = self.entry_last_name.get()
         gender = self.gender_var.get()
         phone_number = self.entry_phone_number.get()
         email = self.entry_email.get()
-        password = self.entry_password.get()
         password_confirmation = self.entry_password_confirmation.get()
 
-        if password != password_confirmation:
+        if self.use_generated_password.get():
+            password = self.generate_strong_password()
+            # Display the generated password in a pop-up dialog
+            messagebox.showinfo("Generated Password", f"Your generated password is:\n{password}")
+        else:
+            password = self.entry_password.get()
+
+        if not self.use_generated_password.get() and password != password_confirmation:
             messagebox.showerror("Error", "Passwords do not match. Registration failed.")
             return
 
@@ -132,6 +153,13 @@ class RegistrationApp:
         login_window = tk.Tk()
         login_app = LoginApp(login_window)
         login_window.mainloop()
+
+    @staticmethod
+    def generate_strong_password():
+        characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=<>?/"
+        password_length = 15
+        generated_password = ''.join(random.choice(characters) for i in range(password_length))
+        return generated_password
 
 
 if __name__ == "__main__":
