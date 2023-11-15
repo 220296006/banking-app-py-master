@@ -16,9 +16,10 @@ class BankingGUI:
         self.master = master
         self.master.title("Banking App")
         self.load_user_data(account_number)
+        self.master.geometry("600x600")
 
         # Use Ubuntu font
-        ubuntu_font = font.Font(family="Ubuntu", size=12)
+        ubuntu_font = font.Font(family="Ubuntu", size=16)
 
         # Update label styles
         label_style = {'font': ubuntu_font, 'padx': 10, 'pady': 10}
@@ -60,6 +61,7 @@ class BankingGUI:
     def show_transaction_options(self):
         options = "Choose an option:\n1. Deposit\n2. Withdrawal"
         choice = simpledialog.askinteger("Transaction Options", options, minvalue=1, maxvalue=2)
+        self.master.geometry("400x400")
 
         if choice == 1:
             self.perform_deposit()
@@ -70,11 +72,13 @@ class BankingGUI:
         deposit_amount = simpledialog.askfloat("Deposit", "Enter deposit amount:")
         if deposit_amount:
             self.update_transaction_log(deposit_amount, 0)
+            self.master.geometry("400x400")
 
     def perform_withdrawal(self):
         withdrawal_amount = simpledialog.askfloat("Withdrawal", "Enter withdrawal amount:")
         if withdrawal_amount:
             self.update_transaction_log(0, withdrawal_amount)
+            self.master.geometry("400x400")
 
     def update_transaction_log(self, deposit, withdrawal):
         with SessionLocal() as session:
@@ -90,11 +94,13 @@ class BankingGUI:
 
             self.load_user_data(self.user.account_number)
             self.label_balance.config(text=f"Your Account Balance is: R{self.current_balance:.2f}")
+            self.master.geometry("400x400")
 
     def show_investment_options(self):
         # Implement the logic to show bond/home loan and invest calculators
         options = "Choose an option:\n1. Bond/Home Loan\n2. Invest Calculators"
         choice = simpledialog.askinteger("Investment Options", options, minvalue=1, maxvalue=2)
+        self.master.geometry("400x400")
 
         if choice == 1:
             self.perform_bond_loan_calculation()
@@ -105,6 +111,7 @@ class BankingGUI:
         loan_amount = simpledialog.askfloat("Bond/Home Loan", "Enter loan amount:")
         interest_rate = simpledialog.askfloat("Bond/Home Loan", "Enter annual interest rate:")
         loan_term_years = simpledialog.askinteger("Bond/Home Loan", "Enter loan term (in years):")
+        self.master.geometry("400x400")
 
         if loan_amount and interest_rate and loan_term_years:
             interest_type = simpledialog.askstring("Interest Type", "Enter interest type (simple/compound):")
@@ -120,6 +127,7 @@ class BankingGUI:
         investment_amount = simpledialog.askfloat("Investment", "Enter investment amount:")
         annual_return_rate = simpledialog.askfloat("Investment", "Enter annual return rate:")
         investment_term_years = simpledialog.askinteger("Investment", "Enter investment term (in years):")
+        self.master.geometry("400x400")
 
         if investment_amount and annual_return_rate and investment_term_years:
             future_value = self.calculate_future_value(investment_amount, annual_return_rate, investment_term_years)
@@ -148,6 +156,7 @@ class BankingGUI:
         return future_value
 
     def save_investment_details(self, investment_type, amount, rate, term, result):
+        self.master.geometry("400x400")
         with SessionLocal() as session:
             new_investment = Investment(
                 account_number=self.user.account_number,
@@ -166,6 +175,7 @@ class BankingGUI:
             session.commit()
 
     def view_statement(self):
+        self.master.geometry("400x400")
         with SessionLocal() as session:
             transactions = session.query(Transaction).filter_by(account_number=self.user.account_number).all()
 
@@ -180,6 +190,7 @@ class BankingGUI:
                 messagebox.showinfo("Transaction Statement", "No transactions found.")
 
     def view_balance(self):
+        self.master.geometry("400x400")
         with SessionLocal() as session:
             transactions = session.query(Transaction).filter_by(account_number=self.user.account_number).all()
             current_balance = sum(transaction.deposits - transaction.withdrawals for transaction in transactions)

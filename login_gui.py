@@ -4,7 +4,7 @@
 # @Time : 09:53
 
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 from tkinter import font as tkfont
 
 import hashlib
@@ -18,6 +18,7 @@ class LoginApp:
     def __init__(self, master):
         self.master = master
         self.master.title("User Login")
+        self.master.geometry("400x300")
 
         # Use Ubuntu font
         ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
@@ -46,11 +47,11 @@ class LoginApp:
         btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 5}
 
         # Login button
-        self.btn_login = ttk.Button(master, text="Login", command=self.login_user, **btn_style)
+        self.btn_login = tk.Button(master, text="Login", command=self.login_user, **btn_style)
         self.btn_login.pack(pady=10)
 
     def login_user(self):
-        first_name = self.entry_username.get().strip()
+        first_name = self.entry_first_name.get().strip()
         password = self.entry_password.get()
 
         Session = sessionmaker(bind=engine)

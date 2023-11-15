@@ -17,6 +17,7 @@ class RegistrationApp:
     def __init__(self, master):
         self.master = master
         self.master.title("User Registration")
+        self.master.geometry("800x800")
 
         # Use Ubuntu font
         ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
@@ -79,7 +80,7 @@ class RegistrationApp:
         btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 5}
 
         # Register button
-        self.btn_register = ttk.Button(master, text="Register", command=self.register_user, **btn_style)
+        self.btn_register = tk.Button(master, text="Register", command=self.register_user, **btn_style)
         self.btn_register.pack(pady=10)
 
     @staticmethod
