@@ -14,6 +14,7 @@ from models import User
 
 Base = declarative_base()
 
+
 def get_user_by_account_number(session: Session, account_number: int) -> User:
     return session.query(User).filter(User.account_number == account_number).first()
 
@@ -33,6 +34,7 @@ class User(Base):
 
     transactions = relationship("Transaction", back_populates="user")
     investments = relationship("Investment", back_populates="user")
+    forgot_passwords = relationship("ForgotPassword", back_populates="user")
 
     def verify_password(self, entered_password):
         hashed_entered_password = hashlib.sha256(entered_password.encode()).hexdigest()
@@ -76,8 +78,20 @@ class Investment(Base):
     user = relationship("User", back_populates="investments")
 
 
+class ForgotPassword(Base):
+    __tablename__ = 'forgot_passwords'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    email = Column(String, index=True)
+    new_password = Column(String)
+
+    # Relationship with the User model
+    user = relationship("User", back_populates="forgot_passwords")
+
+
 # SQLite database initialization
-DATABASE_URL = "sqlite:///./test.db"
+DATABASE_URL = "sqlite:///./BankData.db"
 engine = create_engine(DATABASE_URL)
 
 # In your code, before creating the engine and metadata, add the following line to drop the existing tables

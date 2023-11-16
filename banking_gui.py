@@ -4,7 +4,7 @@
 # @Time : 10:10
 
 import tkinter as tk
-from tkinter import messagebox, simpledialog, font
+from tkinter import messagebox, simpledialog, font, ttk
 
 from database import SessionLocal, Transaction, get_user_by_account_number, Investment
 
@@ -17,12 +17,16 @@ class BankingGUI:
         self.master.title("Banking App")
         self.load_user_data(account_number)
         self.master.geometry("600x600")
+        self.master.configure(bg='gray')
+
+        button_height = 2
+        button_width = 20
 
         # Use Ubuntu font
         ubuntu_font = font.Font(family="Ubuntu", size=16)
 
-        # Update label styles
-        label_style = {'font': ubuntu_font, 'padx': 10, 'pady': 10}
+        button_style = ttk.Style()
+        button_style.configure("TButton", padding=(10, 5), font=('Ubuntu', 12), background='blue', foreground='black')
 
         # Welcome message
         if self.user:
@@ -33,23 +37,35 @@ class BankingGUI:
             self.label_balance = tk.Label(master, text=f"Your Account Balance is: R{self.current_balance:.2f}")
             self.label_balance.pack(pady=20)
 
-            # Buttons
+            # Transaction button
             self.btn_transaction = tk.Button(master, text="Transaction", command=self.show_transaction_options,
-                                             width=20, height=2)
-            self.btn_transaction.pack(pady=20)
+                                             width=button_width, height=button_height)
+            self.btn_transaction.pack(pady=20, padx=10)
 
-            self.btn_investment = tk.Button(master, text="Investment", command=self.show_investment_options, width=20,
-                                            height=2)
-            self.btn_investment.pack(pady=20)
+            # Investment button
+            self.btn_investment = tk.Button(master, text="Investment", command=self.show_investment_options,
+                                            width=button_width, height=button_height)
+            self.btn_investment.pack(pady=20, padx=10)
 
-            self.btn_statement = tk.Button(master, text="Statement", command=self.view_statement, width=20, height=2)
-            self.btn_statement.pack(pady=20)
+            # Statement button
+            self.btn_statement = tk.Button(master, text="Statement", command=self.view_statement,
+                                           width=button_width, height=button_height)
+            self.btn_statement.pack(pady=20, padx=10)
 
-            self.btn_view_balance = tk.Button(master, text="View Balance", command=self.view_balance, width=20,
-                                              height=2)
-            self.btn_view_balance.pack(pady=20)
+            # View Balance button
+            self.btn_view_balance = tk.Button(master, text="View Balance", command=self.view_balance,
+                                              width=button_width, height=button_height)
+            self.btn_view_balance.pack(pady=20, padx=10)
+
+            # Exit button
+            self.btn_exit = tk.Button(master, text="Exit", command=self.exit_system,
+                                      width=button_width, height=button_height)
+            self.btn_exit.pack(pady=20, padx=10)
         else:
             messagebox.showerror("Error", "User not found. Unable to load data.")
+
+    def exit_system(self):
+        self.master.destroy()
 
     def load_user_data(self, account_number):
         with SessionLocal() as session:
@@ -65,6 +81,7 @@ class BankingGUI:
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Transaction Options")
         custom_dialog.geometry("400x300")
+        custom_dialog.configure(bg='gray')
 
         label = tk.Label(custom_dialog, text=options, font=("Ubuntu", 12))
         label.pack(pady=10)
@@ -79,21 +96,35 @@ class BankingGUI:
         confirm_button.pack(pady=10)
 
     def handle_transaction_choice(self, choice, dialog):
-        # Process the choice here
-        if choice == '1':
+        try:
+            choice = int(choice)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid choice. Please enter a number.")
+            return
+
+        if choice == 1:
             self.perform_deposit()
-        elif choice == '2':
+        elif choice == 2:
             self.perform_withdrawal()
 
-        # Close the custom dialog
         dialog.destroy()
-
-        # Update the main window
         self.master.geometry("400x400")
         self.master.update()
 
     def perform_deposit(self):
-        deposit_amount = simpledialog.askfloat("Deposit", "Enter deposit amount:")
+        try:
+            deposit_amount = simpledialog.askfloat("Deposit", "Enter deposit amount:")
+            if deposit_amount is None:
+                messagebox.showinfo("Info", "Deposit canceled.")
+                return  # User canceled the input dialog
+        except ValueError:
+            messagebox.showerror("Error", "Invalid deposit amount. Please enter a valid number.")
+            return
+
+        if deposit_amount <= 0:
+            messagebox.showerror("Error", "Invalid deposit amount. Please enter a positive amount.")
+            return
+
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Deposit Confirmation")
         custom_dialog.geometry("400x300")
@@ -119,10 +150,24 @@ class BankingGUI:
         self.master.update()
 
     def perform_withdrawal(self):
-        withdrawal_amount = simpledialog.askfloat("Withdrawal", "Enter withdrawal amount:")
+        try:
+            withdrawal_amount = simpledialog.askfloat("Withdrawal", "Enter withdrawal amount:")
+            if withdrawal_amount is None:
+                messagebox.showinfo("Info", "Withdrawal canceled.")
+                return  # User canceled the input dialog
+        except ValueError:
+            messagebox.showerror("Error", "Invalid withdrawal amount. Please enter a valid number.")
+            return
+
+        if withdrawal_amount <= 0:
+            messagebox.showerror("Error", "Invalid withdrawal amount. Please enter a positive amount.")
+            return
+
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Withdrawal Confirmation")
-        custom_dialog.geometry("400x300")
+        custom_dialog.geometry("400x400")
+        custom_dialog.configure(bg='gray')
+
 
         label_text = f"Confirm withdrawal of R{withdrawal_amount:.2f}?"
         label = tk.Label(custom_dialog, text=label_text, font=("Ubuntu", 12))
@@ -158,19 +203,17 @@ class BankingGUI:
 
             self.load_user_data(self.user.account_number)
             self.label_balance.config(text=f"Your Account Balance is: R{self.current_balance:.2f}")
-            self.master.geometry("400x400")
+            self.master.geometry("600x600")
             self.master.update()
 
     def show_investment_options(self):
         options = "Choose an option:\n1. Bond/Home Loan\n2. Invest Calculators"
-        choice = simpledialog.askinteger("Investment Options", options, minvalue=1, maxvalue=2)
-
         custom_dialog = tk.Toplevel(self.master)
-        custom_dialog.title("Investment Confirmation")
+        custom_dialog.title("Investment Options")
         custom_dialog.geometry("400x300")
+        custom_dialog.configure(bg='gray')
 
-        label_text = "Confirm your choice?"
-        label = tk.Label(custom_dialog, text=label_text, font=("Ubuntu", 12))
+        label = tk.Label(custom_dialog, text=options, font=("Ubuntu", 12))
         label.pack(pady=10)
 
         entry_var = tk.StringVar()
@@ -178,35 +221,46 @@ class BankingGUI:
         entry.pack(pady=10)
 
         confirm_button = tk.Button(custom_dialog, text="Confirm",
-                                   command=lambda: self.handle_investment_confirmation(choice, entry_var.get(),
-                                                                                       custom_dialog),
+                                   command=lambda: self.handle_investment_confirmation(entry_var.get(), custom_dialog),
                                    font=("Ubuntu", 12))
         confirm_button.pack(pady=10)
 
-    def handle_investment_confirmation(self, choice, user_input, dialog):
+    def handle_investment_confirmation(self, choice, dialog):
+        try:
+            choice = int(choice)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid choice. Please enter a number.")
+            return
+
         if choice == 1:
             self.perform_bond_loan_calculation()
         elif choice == 2:
             self.perform_investment_calculation()
 
         dialog.destroy()
-
         self.master.geometry("400x400")
         self.master.update()
 
     def perform_bond_loan_calculation(self):
-        loan_amount = simpledialog.askfloat("Bond/Home Loan", "Enter loan amount:")
-        interest_rate = simpledialog.askfloat("Bond/Home Loan", "Enter annual interest rate:")
-        loan_term_years = simpledialog.askinteger("Bond/Home Loan", "Enter loan term (in years):")
+        try:
+            loan_amount = simpledialog.askfloat("Bond/Home Loan", "Enter loan amount:")
+            interest_rate = simpledialog.askfloat("Bond/Home Loan", "Enter annual interest rate:")
+            loan_term_years = simpledialog.askinteger("Bond/Home Loan", "Enter loan term (in years):")
+            if any(arg is None for arg in (loan_amount, interest_rate, loan_term_years)):
+                messagebox.showinfo("Info", "Loan calculation canceled.")
+                return  # User canceled the input dialog
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Please enter valid numbers.")
+            return
 
-        # Create a custom Toplevel window
+        if loan_amount <= 0 or interest_rate <= 0 or loan_term_years <= 0:
+            messagebox.showerror("Error", "Invalid input. Please enter positive values.")
+            return
+
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Loan Calculation Confirmation")
+        custom_dialog.geometry("400x400")
 
-        # Set the size of the dialog box
-        custom_dialog.geometry("400x300")
-
-        # Create label and text widget in the custom dialog
         label_text = "Confirm your loan details?"
         label = tk.Label(custom_dialog, text=label_text, font=("Ubuntu", 12))
         label.pack(pady=10)
@@ -215,7 +269,6 @@ class BankingGUI:
         entry = tk.Entry(custom_dialog, textvariable=entry_var, font=("Ubuntu", 12), width=30)
         entry.pack(pady=10)
 
-        # Create a button to confirm the loan details
         confirm_button = tk.Button(custom_dialog, text="Confirm",
                                    command=lambda: self.handle_loan_details_confirmation(loan_amount, interest_rate,
                                                                                          loan_term_years,
@@ -225,27 +278,48 @@ class BankingGUI:
         confirm_button.pack(pady=10)
 
     def handle_loan_details_confirmation(self, loan_amount, interest_rate, loan_term_years, user_input, dialog):
-        if user_input:
-            interest_type = simpledialog.askstring("Interest Type", "Enter interest type (simple/compound):")
-            if interest_type and interest_type.lower() in ["simple", "compound"]:
-                monthly_payment = self.calculate_monthly_payment(loan_amount, interest_rate, loan_term_years,
-                                                                 interest_type)
-                self.save_investment_details("Bond/Home Loan", loan_amount, interest_rate, loan_term_years,
-                                             monthly_payment)
-            else:
-                messagebox.showerror("Error", "Invalid interest type. Please enter 'simple' or 'compound'.")
+        try:
+            user_input = user_input.strip().lower()
+            if user_input != 'yes':
+                messagebox.showinfo("Info", "Loan details confirmation canceled.")
+                return  # Confirmation canceled by the user
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Please enter 'yes' to confirm or leave it blank to cancel.")
+            return
+
+        interest_type = simpledialog.askstring("Interest Type", "Enter interest type (simple/compound):")
+        if not interest_type or interest_type.lower() not in ["simple", "compound"]:
+            messagebox.showerror("Error", "Invalid interest type. Please enter 'simple' or 'compound'.")
+            dialog.destroy()
+            self.master.geometry("600x600")
+            self.master.update()
+            return
+
+        monthly_payment = self.calculate_monthly_payment(loan_amount, interest_rate, loan_term_years, interest_type)
+        self.save_investment_details("Bond/Home Loan", loan_amount, interest_rate, loan_term_years, monthly_payment)
+
         dialog.destroy()
-        self.master.geometry("400x400")
+        self.master.geometry("600x600")
         self.master.update()
 
     def perform_investment_calculation(self):
-        investment_amount = simpledialog.askfloat("Investment", "Enter investment amount:")
-        annual_return_rate = simpledialog.askfloat("Investment", "Enter annual return rate:")
-        investment_term_years = simpledialog.askinteger("Investment", "Enter investment term (in years):")
+        try:
+            investment_amount = simpledialog.askfloat("Investment", "Enter investment amount:")
+            annual_return_rate = simpledialog.askfloat("Investment", "Enter annual return rate:")
+            investment_term_years = simpledialog.askinteger("Investment", "Enter investment term (in years):")
+            if any(arg is None for arg in (investment_amount, annual_return_rate, investment_term_years)):
+                messagebox.showinfo("Info", "Investment calculation canceled.")
+                return  # User canceled the input dialog
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Please enter valid numbers.")
+            return
+
+        if investment_amount <= 0 or annual_return_rate <= 0 or investment_term_years <= 0:
+            messagebox.showerror("Error", "Invalid input. Please enter positive values.")
+            return
 
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Investment Calculation Confirmation")
-
         custom_dialog.geometry("400x300")
 
         label_text = "Confirm your investment details?"
@@ -256,7 +330,6 @@ class BankingGUI:
         entry = tk.Entry(custom_dialog, textvariable=entry_var, font=("Ubuntu", 12), width=30)
         entry.pack(pady=10)
 
-        # Create a button to confirm the investment details
         confirm_button = tk.Button(custom_dialog, text="Confirm",
                                    command=lambda: self.handle_investment_details_confirmation(investment_amount,
                                                                                                annual_return_rate,
@@ -268,15 +341,21 @@ class BankingGUI:
 
     def handle_investment_details_confirmation(self, investment_amount, annual_return_rate, investment_term_years,
                                                user_input, dialog):
-        # Process the investment details here
-        if user_input:
-            future_value = self.calculate_future_value(investment_amount, annual_return_rate, investment_term_years)
-            self.save_investment_details("Investment", investment_amount, annual_return_rate, investment_term_years,
-                                         future_value)
+        try:
+            user_input = user_input.strip().lower()
+            if user_input != 'yes':
+                messagebox.showinfo("Info", "Investment details confirmation canceled.")
+                return  # Confirmation canceled by the user
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Please enter 'yes' to confirm or leave it blank to cancel.")
+            return
+
+        future_value = self.calculate_future_value(investment_amount, annual_return_rate, investment_term_years)
+        self.save_investment_details("Investment", investment_amount, annual_return_rate, investment_term_years,
+                                     future_value)
 
         dialog.destroy()
-
-        self.master.geometry("400x400")
+        self.master.geometry("600x600")
         self.master.update()
 
     @staticmethod
@@ -329,7 +408,8 @@ class BankingGUI:
             text_widget.pack(expand=True, fill="both", padx=10, pady=10)
 
             if transactions:
-                user_info = f"{self.user.first_name} {self.user.last_name} - Account Number: {self.user.account_number}\n"
+                user_info = (f"{self.user.first_name} {self.user.last_name} - Account Number: "
+                             f"{self.user.account_number}\n")
                 statement = "Transaction Statement:\n\n" + user_info
 
                 for transaction in transactions:
@@ -354,7 +434,7 @@ class BankingGUI:
             close_button = tk.Button(custom_dialog, text="Close", command=custom_dialog.destroy, font=("Ubuntu", 12))
             close_button.pack(pady=10)
 
-        self.master.geometry("400x400")
+        self.master.geometry("600x600")
         self.master.update()
 
     def view_balance(self):
