@@ -61,6 +61,14 @@ class BankingGUI:
             self.btn_exit = tk.Button(master, text="Exit", command=self.exit_system,
                                       width=button_width, height=button_height)
             self.btn_exit.pack(pady=20, padx=10)
+
+            self.btn_view_balance = tk.Button(master, text="View Balance", command=self.view_balance, width=20,
+                                              height=2)
+            self.btn_view_balance.pack(pady=20)
+
+            self.btn_exit = tk.Button(master, text="Exit", command=self.exit_system, width=20, height=2)
+            self.btn_exit.pack(pady=20)
+
         else:
             messagebox.showerror("Error", "User not found. Unable to load data.")
 
@@ -110,6 +118,7 @@ class BankingGUI:
         dialog.destroy()
         self.master.geometry("400x400")
         self.master.update()
+        self.master.configure(bg='gray')
 
     def perform_deposit(self):
         try:
@@ -128,6 +137,7 @@ class BankingGUI:
         custom_dialog = tk.Toplevel(self.master)
         custom_dialog.title("Deposit Confirmation")
         custom_dialog.geometry("400x300")
+        custom_dialog.configure(bg='gray')
 
         label_text = f"Confirm deposit of R{deposit_amount:.2f}?"
         label = tk.Label(custom_dialog, text=label_text, font=("Ubuntu", 12))
@@ -148,6 +158,7 @@ class BankingGUI:
         dialog.destroy()
         self.master.geometry("400x400")
         self.master.update()
+        self.master.configure(bg='gray')
 
     def perform_withdrawal(self):
         try:
@@ -168,7 +179,6 @@ class BankingGUI:
         custom_dialog.geometry("400x400")
         custom_dialog.configure(bg='gray')
 
-
         label_text = f"Confirm withdrawal of R{withdrawal_amount:.2f}?"
         label = tk.Label(custom_dialog, text=label_text, font=("Ubuntu", 12))
         label.pack(pady=10)
@@ -188,6 +198,7 @@ class BankingGUI:
         dialog.destroy()
         self.master.geometry("400x400")
         self.master.update()
+        self.master.configure(bg='gray')
 
     def update_transaction_log(self, deposit, withdrawal):
         with SessionLocal() as session:
@@ -240,6 +251,7 @@ class BankingGUI:
         dialog.destroy()
         self.master.geometry("400x400")
         self.master.update()
+        self.master.configure(bg='gray')
 
     def perform_bond_loan_calculation(self):
         try:

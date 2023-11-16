@@ -18,6 +18,7 @@ class RegistrationApp:
         self.generated_password = ""
         self.master.configure(bg='gray')
 
+
         ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
         label_style = {'font': ubuntu_font}
         entry_style = {'font': ubuntu_font, 'width': 30}
