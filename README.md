@@ -56,8 +56,7 @@ Use the intuitive graphical user interface to explore the features.
 - Perform deposits and withdrawals.
 
 3. Investment Options
-
--Calculate loan details (bond/home loan).
+- Calculate loan details (bond/home loan).
 - Perform investment calculations.
 
 4. Statement Generation
