@@ -43,6 +43,15 @@ class LoginApp:
         self.entry_password = tk.Entry(master, show="*", **entry_style)
         self.entry_password.pack(pady=10)
 
+        # Checkbox to show password
+        self.show_password_var = tk.BooleanVar()
+        self.show_password_var.set(False)
+
+        self.checkbox_show_password = tk.Checkbutton(master, text="Show Password",
+                                                     variable=self.show_password_var,
+                                                     command=self.toggle_password_visibility, **label_style)
+        self.checkbox_show_password.pack(pady=10)
+
         # Style for the login button
         btn_style = {'font': ubuntu_font, 'background': '#3498db', 'foreground': 'white', 'width': 15, 'pady': 5}
 
@@ -80,14 +89,19 @@ class LoginApp:
             messagebox.showerror("Login Failed", "Incorrect username or password")
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred during login: {e}")
-        finally:
-            session.close()
+
+        self.entry_password.delete(0, tk.END)
 
     def open_banking_gui(self, user):
         self.master.destroy()
         banking_window = tk.Tk()
         banking_gui = BankingGUI(banking_window, account_number=user.account_number)
         banking_window.mainloop()
+
+    def toggle_password_visibility(self):
+        show_password = self.show_password_var.get()
+        show_char = "" if show_password else "*"
+        self.entry_password.configure(show=show_char)
 
 
 if __name__ == "__main__":

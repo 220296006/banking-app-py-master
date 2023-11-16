@@ -48,9 +48,14 @@ class BankingGUI:
             self.btn_view_balance = tk.Button(master, text="View Balance", command=self.view_balance, width=20,
                                               height=2)
             self.btn_view_balance.pack(pady=20)
+
+            self.btn_exit = tk.Button(master, text="Exit", command=self.exit_system, width=20, height=2)
+            self.btn_exit.pack(pady=20)
         else:
             messagebox.showerror("Error", "User not found. Unable to load data.")
 
+    def exit_system(self):
+        self.master.destroy()
     def load_user_data(self, account_number):
         with SessionLocal() as session:
             self.user = get_user_by_account_number(session, account_number)

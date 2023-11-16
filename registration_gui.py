@@ -1,3 +1,4 @@
+import secrets
 import tkinter as tk
 import tkinter.font as tkfont
 import random
@@ -8,27 +9,13 @@ from sqlalchemy.exc import IntegrityError
 from login_gui import LoginApp
 from tkinter import ttk, messagebox
 
-def password_strength(password):
-    # Criteria for password strength
-    length_criteria = len(password) >= 8
-    digit_criteria = re.search(r"\d", password) is not None
-    lowercase_criteria = re.search(r"[a-z]", password) is not None
-    uppercase_criteria = re.search(r"[A-Z]", password) is not None
-    special_char_criteria = re.search(r"[!@#$%^&*(),.?\":{}|<>]", password) is not None
-
-    # Check overall strength
-    if length_criteria and digit_criteria and lowercase_criteria and uppercase_criteria and special_char_criteria:
-        return "Strong", "green"
-    elif length_criteria and digit_criteria and lowercase_criteria and uppercase_criteria:
-        return "Medium", "orange"
-    else:
-        return "Weak", "red"
 
 class RegistrationApp:
     def __init__(self, master):
         self.master = master
         self.master.title("User Registration")
         self.master.geometry("800x800")
+        self.generated_password = ""
 
         ubuntu_font = tkfont.Font(family="Ubuntu", size=12)
         label_style = {'font': ubuntu_font}
@@ -107,7 +94,7 @@ class RegistrationApp:
 
         self.entry_phone_number.bind("<FocusOut>", self.validate_phone_number)
         self.entry_email.bind("<FocusOut>", self.validate_email)
-        self.entry_password.bind("<KeyRelease>", self.update_password_strength)
+        self.entry_password.bind("<KeyRelease>", self.on_password_change)
 
         self.btn_register = tk.Button(master, text="Register", command=self.register_user, **btn_style)
         self.btn_register.pack(pady=10)
@@ -118,8 +105,9 @@ class RegistrationApp:
         self.entry_password_confirmation.configure(state=state)
 
         if self.use_generated_password.get():
-            generated_password = self.generate_strong_password()
-            self.label_generated_password.config(text=f"Generated Password: {generated_password}")
+            # Generate and store the password
+            self.generated_password = self.generate_strong_password(self)
+            self.label_generated_password.config(text=f"Generated Password: {self.generated_password}")
         else:
             self.label_generated_password.config(text="")
 
@@ -149,8 +137,9 @@ class RegistrationApp:
         email = self.entry_email.get()
         password_confirmation = self.entry_password_confirmation.get()
 
+        # Use the stored generated password if checkbox is checked
         if self.use_generated_password.get():
-            password = self.generate_strong_password()
+            password = self.generated_password
             messagebox.showinfo("Generated Password", f"Your generated password is:\n{password}")
         else:
             password = self.entry_password.get()
@@ -194,16 +183,48 @@ class RegistrationApp:
         return random.randint(100000, 999999)
 
     @staticmethod
-    def generate_strong_password():
+    def generate_strong_password(self):
         characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=<>?/"
-        password_length = 15
+        password_length = secrets.choice(range(5, 16))
         generated_password = ''.join(random.choice(characters) for i in range(password_length))
+
+        # Update the password entry with the generated password
+        self.entry_password.delete(0, tk.END)
+        self.entry_password.insert(0, generated_password)
+
         return generated_password
 
-    def update_password_strength(self, event):
+    def check_password_match(self):
         password = self.entry_password.get()
-        strength, color = password_strength(password)
-        self.label_password_strength.config(text=f"Password Strength: {strength}", fg=color)
+        confirm_password = self.entry_password_confirmation.get()
+
+        if password == confirm_password:
+            self.label_password_strength.config(text="Password Match", fg="green")
+        else:
+            self.label_password_strength.config(text="Password Mismatch", fg="red")
+
+    @staticmethod
+    def password_strength(password):
+        # Criteria for password strength
+        length_criteria = len(password) >= 8
+        digit_criteria = re.search(r"\d", password) is not None
+        lowercase_criteria = re.search(r"[a-z]", password) is not None
+        uppercase_criteria = re.search(r"[A-Z]", password) is not None
+        special_char_criteria = re.search(r"[!@#$%^&*(),.?\":{}|<>]", password) is not None
+
+        # Check overall strength
+        if length_criteria and digit_criteria and lowercase_criteria and uppercase_criteria and special_char_criteria:
+            return "Strong", "green"
+        elif length_criteria and digit_criteria and lowercase_criteria and uppercase_criteria:
+            return "Medium", "orange"
+        else:
+            return "Weak", "red"
+
+    def on_password_change(self, *args):
+        password = self.entry_password.get()
+        strength, color = self.password_strength(password)
+        self.label_password_strength.config(text=f" {strength} Password", fg=color)
+
 
 if __name__ == "__main__":
     root = tk.Tk()

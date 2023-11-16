@@ -14,6 +14,7 @@ from models import User
 
 Base = declarative_base()
 
+
 def get_user_by_account_number(session: Session, account_number: int) -> User:
     return session.query(User).filter(User.account_number == account_number).first()
 
@@ -74,6 +75,11 @@ class Investment(Base):
     monthly_payment = Column(Float)
 
     user = relationship("User", back_populates="investments")
+
+class ForgotPassword(BaseModel):
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String)
+    security_answer = Column(String)
 
 
 # SQLite database initialization
